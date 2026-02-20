@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package article;
+
+option go_package = "Project/proto/article";
+
+message Article {
+
+    string title = 1;
+    string body = 2;
+
+}
+
+message ArticleRequest {
+    Article article = 1;
+}
+
+message ArticleResponse {
+    Article article = 1;
+    repeated string tags = 2;
+    string created_at = 3;
+}
+
+message TopTagsRequst {
+    int64 topn = 1;
+}
+message Tag {
+    string word = 1;
+    int64 freq = 2;
+}
+message TopTagResponse {
+    repeated Tag tags = 1;
+}
+
+service ArticleService {
+    rpc ProcessArticles(stream ArticleRequest) returns (ArticleResponse){}
+    rpc TopTags(TopTagsRequst) returns (TopTagResponse){}
+}
