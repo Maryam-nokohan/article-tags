@@ -17,7 +17,7 @@ message ArticleRequest {
 
 message ArticleResponse {
     Article article = 1;
-    repeated string tags = 2;
+    repeated Tag tags = 2;
     string created_at = 3;
 }
 
