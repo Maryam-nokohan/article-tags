@@ -17,7 +17,7 @@ func NewTagEctractorService() *TagExtractorService {
 		stopWords: s,
 	}
 }
-func (t *TagExtractorService) isStopWord(word string) bool {
+func (t *TagExtractorService) IsStopWord(word string) bool {
 	_, ok := t.stopWords[word]
 	return ok
 }
@@ -48,7 +48,7 @@ func (t *TagExtractorService) Extract(text string, topN int64) []domain.Tag {
 	})
 	var tags []domain.Tag
 	for _, p := range pairs {
-		if !t.isStopWord(p.word) {
+		if !t.IsStopWord(p.word) {
 			tags = append(tags, domain.Tag{
 				Word: p.word,
 				Freq: int64(p.count),

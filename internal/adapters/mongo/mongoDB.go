@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/maryam-nokohan/go-article/internal/configs"
@@ -12,65 +13,67 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-
 type MongoRepo struct {
-
-	Client *mongo.Client
+	Client      *mongo.Client
 	Collections *mongo.Collection
-	Config *configs.Config
+	Config      *configs.Config
 }
 
-func NewMongoRepo()(*MongoRepo , error) {
-	config , err := configs.Newconfig()
+func NewMongoRepo() (*MongoRepo, error) {
+	config, err := configs.Newconfig()
 	if err != nil {
-		return  nil , err
+		return nil, err
 	}
 
-	ctx , cancel := context.WithTimeout(context.Background() , time.Second * 10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	c , err := mongo.Connect(ctx , options.Client().ApplyURI(config.URI))
+	c, err := mongo.Connect(ctx, options.Client().ApplyURI(config.URI))
 	if err != nil {
-		return  nil , err
+		return nil, err
 	}
 
-	if err = c.Ping(ctx , nil) ; err != nil {
-		return  nil  , err
+	if err = c.Ping(ctx, nil); err != nil {
+		return nil, err
 	}
 
 	collections := c.Database(config.DBName).Collection("articles")
-	_ , err = collections.Indexes().CreateOne(ctx , mongo.IndexModel{
+	_, err = collections.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{
-			{Key: "created_at" , Value: -1},
+			{Key: "title", Value: 1},
 		},
+		Options: options.Index().SetUnique(true),
 	})
 	if err != nil {
-		return nil , err
+		return nil, err
 	}
 
 	return &MongoRepo{
-		Client: c,
+		Client:      c,
 		Collections: collections,
-
-	} ,nil
+		Config:      config,
+	}, nil
 
 }
 
-func (db *MongoRepo)Save(ctx context.Context , article *domain.Article) error {
+func (db *MongoRepo) Save(ctx context.Context, article *domain.Article) error {
 
-		article.ID = primitive.NewObjectID().Hex()
+	article.ID = primitive.NewObjectID().Hex()
 	article.Created_at = time.Now()
 
-	_ , err := db.Collections.InsertOne(context.Background() , article)
+	_, err := db.Collections.InsertOne(ctx, article)
 	if err != nil {
-		return  err
+		if mongo.IsDuplicateKeyError(err) {
+			return fmt.Errorf("Duplicate Article , %v", err)
+		}
+		return err
 	}
-	return  nil
+	return nil
 }
 
-func (db *MongoRepo) GetTopTags(ctx context.Context , limit int64) ([]domain.Tag , error){
+func (db *MongoRepo) GetTopTags(ctx context.Context, limit int64) ([]domain.Tag, error) {
 
-		pipeline := mongo.Pipeline{
+	pipeline := mongo.Pipeline{
 		bson.D{{"$unwind", "$tags"}},
 		bson.D{{"$group", bson.D{
 			{"_id", "$tags.word"},

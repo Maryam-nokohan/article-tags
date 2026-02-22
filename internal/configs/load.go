@@ -7,12 +7,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func Newconfig() (*Config , error){
-	if err := godotenv.Load();err != nil {
-		return nil , err
+func Newconfig() (*Config, error) {
+	if err := godotenv.Load(); err != nil {
+		return nil, err
 	}
 
-	dbName := os.Getenv("DB_NAME")
+	dbName := os.Getenv("DB_Name")
 	port := os.Getenv("PORT")
 	uri := os.Getenv("URI")
 
@@ -22,7 +22,7 @@ func Newconfig() (*Config , error){
 
 	return &Config{
 		DBName: dbName,
-		Port: port,
-		URI: uri,
-	} , nil
+		Port:   port,
+		URI:    uri,
+	}, nil
 }
