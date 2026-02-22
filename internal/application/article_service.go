@@ -20,19 +20,19 @@ func NewArticleService(r ports.ArticleRepository, e domain.TagExtractor) *Articl
 	}
 }
 
-func (s *ArticleService) ProcessArticle(articles domain.Article) (error){
-	
-		tagWords := s.extractor.Extract(articles.Body , -1) 
-		articles.Tags = tagWords
-		articles.Created_at = time.Now()		
-		err := s.repo.Save(context.Background() , &articles)
-	return  err
+func (s *ArticleService) ProcessArticle(articles domain.Article) error {
+
+	tagWords := s.extractor.Extract(articles.Body, -1)
+	articles.Tags = tagWords
+	articles.Created_at = time.Now()
+	err := s.repo.Save(context.Background(), &articles)
+	return err
 }
 
-func (s *ArticleService) GetTopTags(ctx context.Context , limit int64)([]domain.Tag , error){
-	tags , err := s.repo.GetTopTags(ctx , limit)
+func (s *ArticleService) GetTopTags(ctx context.Context, limit int64) ([]domain.Tag, error) {
+	tags, err := s.repo.GetTopTags(ctx, limit)
 	if err != nil {
-		return  nil , err
+		return nil, err
 	}
-	return  tags , nil
+	return tags, nil
 }
