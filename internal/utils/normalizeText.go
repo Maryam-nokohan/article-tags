@@ -5,25 +5,22 @@ import (
 	"os"
 	"strings"
 	"unicode"
+
 )
 
-var stopWords map[string]bool
 
-func LoadStopWords() {
+func LoadStopWords() map[string]bool{
 	data, err := os.ReadFile("stop_words.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	stopWords = map[string]bool{}
+	stopWords := map[string]bool{}
 	for _, w := range strings.Split(string(data), "\n") {
 		stopWords[strings.TrimSpace(w)] = true
 	}
+	return  stopWords
 }
 
-func isStopWord(word string) bool {
-	_, ok := stopWords[word]
-	return ok
-}
 
 func NormilizeText(text string) []string {
 	text = strings.ToLower(text)
@@ -38,3 +35,4 @@ func NormilizeText(text string) []string {
 	words := strings.Fields(builder.String())
 	return words
 }
+
