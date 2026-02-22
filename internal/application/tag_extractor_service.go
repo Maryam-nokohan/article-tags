@@ -7,24 +7,26 @@ import (
 	"github.com/maryam-nokohan/go-article/internal/utils"
 )
 
-type TagExtractorService struct{
+type TagExtractorService struct {
 	stopWords map[string]bool
 }
 
-func NewTagEctractorService() *TagExtractorService{
+func NewTagEctractorService() *TagExtractorService {
 	s := utils.LoadStopWords()
-	return  &TagExtractorService{
+	return &TagExtractorService{
 		stopWords: s,
 	}
 }
-func(t *TagExtractorService)isStopWord(word string) bool{
+func (t *TagExtractorService) isStopWord(word string) bool {
 	_, ok := t.stopWords[word]
-	return  ok
+	return ok
 }
-func (t *TagExtractorService)Extract(text string , topN int64) []domain.Tag {
+func (t *TagExtractorService) Extract(text string, topN int64) []domain.Tag {
 
 	words := utils.NormilizeText(text)
-
+	if topN == -1 {
+		topN = int64(len(words))
+	}
 	wordFreq := make(map[string]int)
 
 	for _, word := range words {
@@ -60,4 +62,3 @@ func (t *TagExtractorService)Extract(text string , topN int64) []domain.Tag {
 	return tags
 
 }
-
