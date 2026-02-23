@@ -30,7 +30,7 @@ func NewServer(articleService *application.ArticleService) *Server {
 	return s
 }
 
-func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticlesServer) error {
+func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServer) error {
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
@@ -57,7 +57,7 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticlesSer
 	}
 }
 
-func (s *Server) GetTopN(ctx context.Context, req *article.TopTagsRequst) (*article.TopTagResponse, error) {
+func (s *Server) TopTags(ctx context.Context, req *article.TopTagsRequst) (*article.TopTagResponse, error) {
 	TopN := req.GetTopn()
 	tags, err := s.service.GetTopTags(ctx, TopN)
 	if err != nil {
@@ -77,7 +77,7 @@ func (s *Server) GetTopN(ctx context.Context, req *article.TopTagsRequst) (*arti
 }
 func (s *Server) Run(address string) error {
 	log.Printf("Running the gRPC server on port %s...", address)
-	lis, err := net.Listen("tcp", address)
+	lis, err := net.Listen("tcp", ":" + address)
 	if err != nil {
 		return err
 	}

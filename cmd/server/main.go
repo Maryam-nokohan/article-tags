@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/maryam-nokohan/go-article/internal/adapters/grpc"
@@ -9,9 +8,7 @@ import (
 	"github.com/maryam-nokohan/go-article/internal/application"
 )
 
-
 func main(){
-	fmt.Print("where")
 	repo , err := mongo.NewMongoRepo()
 	if err != nil {
 		log.Fatal(err)
@@ -19,7 +16,9 @@ func main(){
 	tagExtractor := application.NewTagEctractorService()
 	articleService := application.NewArticleService(repo , tagExtractor)
 	gprcAdaptor := grpc.NewServer(articleService)
-	gprcAdaptor.Run(repo.Config.Port)
-
+	err = gprcAdaptor.Run(repo.Config.GRPC_Port)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 

@@ -33,6 +33,6 @@ message TopTagResponse {
 }
 
 service ArticleService {
-    rpc ProcessArticles(stream ArticleRequest) returns (ArticleResponse){}
+    rpc ProcessArticle(stream ArticleRequest) returns (ArticleResponse){}
     rpc TopTags(TopTagsRequst) returns (TopTagResponse){}
 }

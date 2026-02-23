@@ -19,15 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ArticleService_ProcessArticles_FullMethodName = "/article.ArticleService/ProcessArticles"
-	ArticleService_TopTags_FullMethodName         = "/article.ArticleService/TopTags"
+	ArticleService_ProcessArticle_FullMethodName = "/article.ArticleService/ProcessArticle"
+	ArticleService_TopTags_FullMethodName        = "/article.ArticleService/TopTags"
 )
 
 // ArticleServiceClient is the client API for ArticleService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ArticleServiceClient interface {
-	ProcessArticles(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[ArticleRequest, ArticleResponse], error)
+	ProcessArticle(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[ArticleRequest, ArticleResponse], error)
 	TopTags(ctx context.Context, in *TopTagsRequst, opts ...grpc.CallOption) (*TopTagResponse, error)
 }
 
@@ -39,9 +39,9 @@ func NewArticleServiceClient(cc grpc.ClientConnInterface) ArticleServiceClient {
 	return &articleServiceClient{cc}
 }
 
-func (c *articleServiceClient) ProcessArticles(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[ArticleRequest, ArticleResponse], error) {
+func (c *articleServiceClient) ProcessArticle(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[ArticleRequest, ArticleResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ArticleService_ServiceDesc.Streams[0], ArticleService_ProcessArticles_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ArticleService_ServiceDesc.Streams[0], ArticleService_ProcessArticle_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (c *articleServiceClient) ProcessArticles(ctx context.Context, opts ...grpc
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ArticleService_ProcessArticlesClient = grpc.ClientStreamingClient[ArticleRequest, ArticleResponse]
+type ArticleService_ProcessArticleClient = grpc.ClientStreamingClient[ArticleRequest, ArticleResponse]
 
 func (c *articleServiceClient) TopTags(ctx context.Context, in *TopTagsRequst, opts ...grpc.CallOption) (*TopTagResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -66,7 +66,7 @@ func (c *articleServiceClient) TopTags(ctx context.Context, in *TopTagsRequst, o
 // All implementations must embed UnimplementedArticleServiceServer
 // for forward compatibility.
 type ArticleServiceServer interface {
-	ProcessArticles(grpc.ClientStreamingServer[ArticleRequest, ArticleResponse]) error
+	ProcessArticle(grpc.ClientStreamingServer[ArticleRequest, ArticleResponse]) error
 	TopTags(context.Context, *TopTagsRequst) (*TopTagResponse, error)
 	mustEmbedUnimplementedArticleServiceServer()
 }
@@ -78,8 +78,8 @@ type ArticleServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedArticleServiceServer struct{}
 
-func (UnimplementedArticleServiceServer) ProcessArticles(grpc.ClientStreamingServer[ArticleRequest, ArticleResponse]) error {
-	return status.Error(codes.Unimplemented, "method ProcessArticles not implemented")
+func (UnimplementedArticleServiceServer) ProcessArticle(grpc.ClientStreamingServer[ArticleRequest, ArticleResponse]) error {
+	return status.Error(codes.Unimplemented, "method ProcessArticle not implemented")
 }
 func (UnimplementedArticleServiceServer) TopTags(context.Context, *TopTagsRequst) (*TopTagResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method TopTags not implemented")
@@ -105,12 +105,12 @@ func RegisterArticleServiceServer(s grpc.ServiceRegistrar, srv ArticleServiceSer
 	s.RegisterService(&ArticleService_ServiceDesc, srv)
 }
 
-func _ArticleService_ProcessArticles_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ArticleServiceServer).ProcessArticles(&grpc.GenericServerStream[ArticleRequest, ArticleResponse]{ServerStream: stream})
+func _ArticleService_ProcessArticle_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ArticleServiceServer).ProcessArticle(&grpc.GenericServerStream[ArticleRequest, ArticleResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ArticleService_ProcessArticlesServer = grpc.ClientStreamingServer[ArticleRequest, ArticleResponse]
+type ArticleService_ProcessArticleServer = grpc.ClientStreamingServer[ArticleRequest, ArticleResponse]
 
 func _ArticleService_TopTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TopTagsRequst)
@@ -144,8 +144,8 @@ var ArticleService_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "ProcessArticles",
-			Handler:       _ArticleService_ProcessArticles_Handler,
+			StreamName:    "ProcessArticle",
+			Handler:       _ArticleService_ProcessArticle_Handler,
 			ClientStreams: true,
 		},
 	},

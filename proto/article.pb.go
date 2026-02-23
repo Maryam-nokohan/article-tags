@@ -338,9 +338,9 @@ const file_proto_article_proto_rawDesc = "" +
 	"\x04word\x18\x01 \x01(\tR\x04word\x12\x12\n" +
 	"\x04freq\x18\x02 \x01(\x03R\x04freq\"2\n" +
 	"\x0eTopTagResponse\x12 \n" +
-	"\x04tags\x18\x01 \x03(\v2\f.article.TagR\x04tags2\x98\x01\n" +
-	"\x0eArticleService\x12H\n" +
-	"\x0fProcessArticles\x12\x17.article.ArticleRequest\x1a\x18.article.ArticleResponse\"\x00(\x01\x12<\n" +
+	"\x04tags\x18\x01 \x03(\v2\f.article.TagR\x04tags2\x97\x01\n" +
+	"\x0eArticleService\x12G\n" +
+	"\x0eProcessArticle\x12\x17.article.ArticleRequest\x1a\x18.article.ArticleResponse\"\x00(\x01\x12<\n" +
 	"\aTopTags\x12\x16.article.TopTagsRequst\x1a\x17.article.TopTagResponse\"\x00B\x17Z\x15Project/proto/articleb\x06proto3"
 
 var (
@@ -369,9 +369,9 @@ var file_proto_article_proto_depIdxs = []int32{
 	0, // 1: article.ArticleResponse.article:type_name -> article.Article
 	4, // 2: article.ArticleResponse.tags:type_name -> article.Tag
 	4, // 3: article.TopTagResponse.tags:type_name -> article.Tag
-	1, // 4: article.ArticleService.ProcessArticles:input_type -> article.ArticleRequest
+	1, // 4: article.ArticleService.ProcessArticle:input_type -> article.ArticleRequest
 	3, // 5: article.ArticleService.TopTags:input_type -> article.TopTagsRequst
-	2, // 6: article.ArticleService.ProcessArticles:output_type -> article.ArticleResponse
+	2, // 6: article.ArticleService.ProcessArticle:output_type -> article.ArticleResponse
 	5, // 7: article.ArticleService.TopTags:output_type -> article.TopTagResponse
 	6, // [6:8] is the sub-list for method output_type
 	4, // [4:6] is the sub-list for method input_type
