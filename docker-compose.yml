@@ -1,31 +1,26 @@
-version: "3.9"
-
 services:
   mongo:
-    image: mongo:6.0
+    image: mongo:7
     container_name: mongo
-    restart: always
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-      MONGO_INITDB_DATABASE: articles
+    restart: unless-stopped
     volumes:
-      - mongo-data:/data/db  
+      - mongo_data:/data/db
 
-  grpc-server:
+  app:
     build: .
-    container_name: grpc-server
-    restart: always
+    container_name: article-tags
     ports:
       - "50051:50051"
     environment:
-      PORT: 50051
-      DB_NAME: articles
-      URI: mongodb://root:example@mongo:27017/articles?authSource=admin
+      MONGODB_URI: mongodb://mongo:27017
+      DB_NAME: article
+      GRPC_PORT: 50051
+      STOPWORDS_PATH: /app/internal/utils/stopwords.txt
+    restart: unless-stopped
     depends_on:
       - mongo
 
 volumes:
-  mongo-data:
+  mongo_data:
