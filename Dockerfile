@@ -15,7 +15,14 @@ WORKDIR /app
 
 COPY --from=builder /app/app /app/app
 COPY internal/utils/stopwords.txt /app/internal/utils/stopwords.txt
-COPY .env /app/.env
+
+ARG DB_NAME
+ARG URI
+ARG GRPC_PORT
+
+ENV DB_NAME=$DB_NAME
+ENV URI=$URI
+ENV GRPC_PORT=$GRPC_PORT
 
 EXPOSE 50051
 
