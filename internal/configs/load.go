@@ -8,21 +8,22 @@ import (
 )
 
 func Newconfig() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println("No .env file found, using system environment variables")
 	}
 
-	dbName := os.Getenv("DB_Name")
-	port := os.Getenv("PORT")
+	dbName := os.Getenv("DB_NAME")
+	gRPCPort:= os.Getenv("GRPC_PORT")
 	uri := os.Getenv("URI")
 
-	if uri == "" || dbName == "" || port == "" {
+	if uri == "" || dbName == "" || gRPCPort == "" {
 		log.Fatal("setup your .env")
 	}
 
 	return &Config{
 		DBName: dbName,
-		Port:   port,
+		GRPC_Port: gRPCPort,
 		URI:    uri,
 	}, nil
 }
