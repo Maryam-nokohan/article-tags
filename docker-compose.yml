@@ -9,15 +9,20 @@ services:
       - mongo_data:/data/db
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - DB_NAME=${DB_NAME}
+        - URI=${URI}
+        - GRPC_PORT=${GRPC_PORT}
     container_name: article-tags
     ports:
-      - "50051:50051"
+      - "${GRPC_PORT}:${GRPC_PORT}"
     environment:
-      MONGODB_URI: mongodb://mongo:27017
-      DB_NAME: article
-      GRPC_PORT: 50051
-      STOPWORDS_PATH: /app/internal/utils/stopwords.txt
+      - URI=${URI}
+      - DB_NAME=${DB_NAME}
+      - GRPC_PORT=${GRPC_PORT}
+      - STOPWORDS_PATH=/app/internal/utils/stopwords.txt
     restart: unless-stopped
     depends_on:
       - mongo
