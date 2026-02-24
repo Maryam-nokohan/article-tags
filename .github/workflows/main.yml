@@ -3,6 +3,10 @@ name: CI
 on:
   push:
     branches: [ main ]
+env :
+  DB_NAME: ${{ secrets.DB_NAME }}
+  URI: ${{ secrets.URI }}
+  GRPC_PORT: ${{ secrets.GRPC_PORT }}
 
 jobs:
   build:
