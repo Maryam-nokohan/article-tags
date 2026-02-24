@@ -9,6 +9,7 @@ import (
 
 	"github.com/maryam-nokohan/go-article/internal/application"
 	"github.com/maryam-nokohan/go-article/internal/domain"
+	"github.com/maryam-nokohan/go-article/internal/workerpool"
 	article "github.com/maryam-nokohan/go-article/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -31,9 +32,31 @@ func NewServer(articleService *application.ArticleService) *Server {
 }
 
 func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServer) error {
+
+	pool := workerpool.New(10)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go pool.Run(ctx, func(req *article.ArticleRequest) error {
+		if req.Article == nil {
+			return nil
+		}
+		a := domain.Article{
+			Title: req.Article.Title,
+			Body:  req.Article.Body,
+		}
+		if err := s.service.ProcessArticle(a); err != nil {
+			log.Println("Error saving article:", err)
+			return err
+		}
+		return nil
+	})
+
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
+			pool.Close()
+
 			return stream.SendAndClose(&article.ArticleResponse{
 				Article:   &article.Article{},
 				Tags:      nil,
@@ -41,19 +64,11 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServ
 			})
 		}
 		if err != nil {
+			pool.Close()
 			return status.Errorf(codes.Internal, "recv error: %v", err)
 		}
 
-		domainArticle := &domain.Article{
-			Title: req.Article.Title,
-			Body:  req.Article.Body,
-		}
-
-		go func(a *domain.Article) {
-			if err := s.service.ProcessArticle(*a); err != nil {
-				log.Println("Error saving article:", err)
-			}
-		}(domainArticle)
+		pool.Submit(req)
 	}
 }
 
@@ -77,7 +92,7 @@ func (s *Server) TopTags(ctx context.Context, req *article.TopTagsRequst) (*arti
 }
 func (s *Server) Run(address string) error {
 	log.Printf("Running the gRPC server on port %s...", address)
-	lis, err := net.Listen("tcp", ":" + address)
+	lis, err := net.Listen("tcp", ":"+address)
 	if err != nil {
 		return err
 	}
