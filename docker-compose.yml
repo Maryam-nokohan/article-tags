@@ -22,7 +22,7 @@ services:
       - URI=${URI}
       - DB_NAME=${DB_NAME}
       - GRPC_PORT=${GRPC_PORT}
-      - STOPWORDS_PATH=/app/internal/utils/stopwords.txt
+      - STOPWORDS_PATH=/app/internal/pkg/stopwords.txt
     restart: unless-stopped
     depends_on:
       - mongo

@@ -14,7 +14,7 @@ FROM alpine:3.20
 WORKDIR /app
 
 COPY --from=builder /app/app /app/app
-COPY internal/utils/stopwords.txt /app/internal/utils/stopwords.txt
+COPY internal/pkg/stopwords.txt /app/internal/pkg/stopwords.txt
 
 ARG DB_NAME
 ARG URI
