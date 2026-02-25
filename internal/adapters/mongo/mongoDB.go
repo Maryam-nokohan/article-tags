@@ -8,6 +8,7 @@ import (
 
 	"github.com/maryam-nokohan/go-article/internal/configs"
 	"github.com/maryam-nokohan/go-article/internal/domain"
+	"github.com/maryam-nokohan/go-article/internal/ports"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,11 +21,7 @@ type MongoRepo struct {
 	Config      *configs.Config
 }
 
-func NewMongoRepo() (*MongoRepo, error) {
-	config, err := configs.Newconfig()
-	if err != nil {
-		return nil, err
-	}
+func NewMongoRepo(config *configs.Config) (ports.ArticleRepository, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -38,7 +35,7 @@ func NewMongoRepo() (*MongoRepo, error) {
 		return nil, err
 	}
 
-	collections := c.Database("hello").Collection("articles")
+	collections := c.Database("article-tag").Collection("articles")
 	_, err = collections.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "title", Value: -1},
