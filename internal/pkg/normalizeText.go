@@ -8,7 +8,7 @@ import (
 )
 
 func LoadStopWords() map[string]bool {
-	data, err := os.ReadFile("internal/utils/stopwords.txt")
+	data, err := os.ReadFile("internal/pkg/stopwords.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
