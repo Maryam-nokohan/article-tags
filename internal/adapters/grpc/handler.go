@@ -11,7 +11,7 @@ import (
 
 	"github.com/maryam-nokohan/go-article/internal/application"
 	"github.com/maryam-nokohan/go-article/internal/domain"
-	"github.com/maryam-nokohan/go-article/internal/workerpool"
+	"github.com/maryam-nokohan/go-article/internal/pkg"
 	article "github.com/maryam-nokohan/go-article/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -36,7 +36,7 @@ func NewServer(articleService *application.ArticleService) *Server {
 func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServer) error {
 	log.Println("handler : Received a new article stream")
 
-	pool := workerpool.New(runtime.NumCPU())
+	pool := pkg.New(runtime.NumCPU())
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

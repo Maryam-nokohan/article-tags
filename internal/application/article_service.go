@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/maryam-nokohan/go-article/internal/domain"
+	"github.com/maryam-nokohan/go-article/internal/ports"
 )
 
 type ArticleService struct {
-	repo      domain.ArticleRepository
-	extractor domain.TagExtractor
+	repo      ports.ArticleRepository
+	extractor ports.TagExtractor
 }
 
-func NewArticleService(r domain.ArticleRepository, e domain.TagExtractor) *ArticleService {
+func NewArticleService(r ports.ArticleRepository, e ports.TagExtractor) *ArticleService {
 	return &ArticleService{
 		repo:      r,
 		extractor: e,

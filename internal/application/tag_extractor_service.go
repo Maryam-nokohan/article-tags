@@ -4,15 +4,15 @@ import (
 	"sort"
 
 	"github.com/maryam-nokohan/go-article/internal/domain"
-	"github.com/maryam-nokohan/go-article/internal/utils"
+	"github.com/maryam-nokohan/go-article/internal/pkg"
 )
 
 type TagExtractorService struct {
 	stopWords map[string]bool
 }
 
-func NewTagEctractorService() *TagExtractorService {
-	s := utils.LoadStopWords()
+func NewTagExtractorService() *TagExtractorService {
+	s := pkg.LoadStopWords()
 	return &TagExtractorService{
 		stopWords: s,
 	}
@@ -23,7 +23,7 @@ func (t *TagExtractorService) IsStopWord(word string) bool {
 }
 func (t *TagExtractorService) Extract(text string, topN int64) []domain.Tag {
 
-	words := utils.NormilizeText(text)
+	words := pkg.NormilizeText(text)
 	// topN = -1 > extract all tags
 	if topN == -1 {
 		topN = int64(len(words))

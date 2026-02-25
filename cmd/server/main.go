@@ -13,7 +13,7 @@ func main(){
 	if err != nil {
 		log.Fatal(err)
 	}
-	tagExtractor := application.NewTagEctractorService()
+	tagExtractor := application.NewTagExtractorService()
 	articleService := application.NewArticleService(repo , tagExtractor)
 	gprcAdaptor := grpc.NewServer(articleService)
 	err = gprcAdaptor.Run(repo.Config.GRPC_Port)
