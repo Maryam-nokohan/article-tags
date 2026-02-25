@@ -24,6 +24,7 @@ func (t *TagExtractorService) IsStopWord(word string) bool {
 func (t *TagExtractorService) Extract(text string, topN int64) []domain.Tag {
 
 	words := utils.NormilizeText(text)
+	// topN = -1 > extract all tags
 	if topN == -1 {
 		topN = int64(len(words))
 	}

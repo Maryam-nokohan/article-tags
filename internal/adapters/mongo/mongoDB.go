@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/maryam-nokohan/go-article/internal/configs"
@@ -37,10 +38,10 @@ func NewMongoRepo() (*MongoRepo, error) {
 		return nil, err
 	}
 
-	collections := c.Database(config.DBName).Collection("articles")
+	collections := c.Database("hello").Collection("articles")
 	_, err = collections.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{
-			{Key: "title", Value: 1},
+			{Key: "title", Value: -1},
 		},
 		Options: options.Index().SetUnique(true),
 	})
@@ -57,7 +58,7 @@ func NewMongoRepo() (*MongoRepo, error) {
 }
 
 func (db *MongoRepo) Save(ctx context.Context, article *domain.Article) error {
-
+	log.Println("In mongoRepo : Saving article with title:", article.Title)
 	article.ID = primitive.NewObjectID().Hex()
 	article.Created_at = time.Now()
 
@@ -72,7 +73,7 @@ func (db *MongoRepo) Save(ctx context.Context, article *domain.Article) error {
 }
 
 func (db *MongoRepo) GetTopTags(ctx context.Context, limit int64) ([]domain.Tag, error) {
-
+	log.Println("In mongoRepo : Getting top tags with limit:", limit)
 	pipeline := mongo.Pipeline{
 		bson.D{{"$unwind", "$tags"}},
 		bson.D{{"$group", bson.D{
