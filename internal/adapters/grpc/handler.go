@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -40,14 +39,8 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServ
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	pool.Run(ctx, func(req *article.ArticleRequest) error {
-		if req.Article == nil {
-			return fmt.Errorf("invalid article data: article is nil")
-		}
-		a := domain.Article{
-			Title: req.Article.Title,
-			Body:  req.Article.Body,
-		}
+
+	pool.Run(ctx, func(a *domain.Article) error {
 		if err := s.service.ProcessArticle(a); err != nil {
 			log.Println("Error saving article:", err)
 			return err
@@ -68,8 +61,14 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServ
 			pool.Close()
 			return status.Errorf(codes.Internal, "recv error: %v", err)
 		}
-
-		pool.Submit(req)
+		if req.Article == nil {
+			continue
+		}
+		a := &domain.Article{
+			Title: req.Article.Title,
+			Body:  req.Article.Body,
+		}
+		pool.Submit(a)
 	}
 }
 

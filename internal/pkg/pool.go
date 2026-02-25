@@ -5,24 +5,24 @@ import (
 	"log"
 	"sync"
 
-	article "github.com/maryam-nokohan/go-article/proto"
+	"github.com/maryam-nokohan/go-article/internal/domain"
 )
 
 type WorkerPool struct {
 	workerCount int
-	jobs        chan *article.ArticleRequest
+	jobs        chan *domain.Article
 	wg          sync.WaitGroup
 }
 
 func New(wcount int) WorkerPool {
 	return WorkerPool{
 		workerCount: wcount,
-		jobs:        make(chan *article.ArticleRequest, wcount),
+		jobs:        make(chan *domain.Article, 100),
 		wg: 		sync.WaitGroup{},
 	}
 }
 
-func (wp *WorkerPool) Run(ctx context.Context, process func(*article.ArticleRequest) error) {
+func (wp *WorkerPool) Run(ctx context.Context, process func(*domain.Article) error) {
 
 	for i := 0; i < wp.workerCount; i++ {
 		wp.wg.Add(1)
@@ -48,7 +48,7 @@ func (wp *WorkerPool) Run(ctx context.Context, process func(*article.ArticleRequ
 
 }
 
-func (wp *WorkerPool) Submit(job *article.ArticleRequest) {
+func (wp *WorkerPool) Submit(job *domain.Article) {
 	wp.jobs <- job
 }
 

@@ -21,12 +21,12 @@ func NewArticleService(r ports.ArticleRepository, e ports.TagExtractor) *Article
 	}
 }
 
-func (s *ArticleService) ProcessArticle(articles domain.Article) error {
+func (s *ArticleService) ProcessArticle(articles *domain.Article) error {
 	log.Println("In ArticleService : Processing article with title:", articles.Title)
 	tagWords := s.extractor.Extract(articles.Body, -1)
 	articles.Tags = tagWords
 	articles.Created_at = time.Now()
-	err := s.repo.Save(context.Background(), &articles)
+	err := s.repo.Save(context.Background(), articles)
 	return err
 }
 
