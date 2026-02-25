@@ -2,6 +2,7 @@ package workerpool
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	article "github.com/maryam-nokohan/go-article/proto"
@@ -10,42 +11,41 @@ import (
 type WorkerPool struct {
 	workerCount int
 	jobs        chan *article.ArticleRequest
-	results     chan *article.ArticleResponse
-	Done        chan struct{}
+	wg          sync.WaitGroup
 }
 
 func New(wcount int) WorkerPool {
 	return WorkerPool{
 		workerCount: wcount,
 		jobs:        make(chan *article.ArticleRequest, wcount),
-		results:     make(chan *article.ArticleResponse, wcount),
-		Done:        make(chan struct{}),
+		wg: 		sync.WaitGroup{},
 	}
 }
 
-func (wp WorkerPool) Run(ctx context.Context , process func(*article.ArticleRequest) error) {
-	var wg sync.WaitGroup
+func (wp *WorkerPool) Run(ctx context.Context, process func(*article.ArticleRequest) error) {
 
 	for i := 0; i < wp.workerCount; i++ {
-		wg.Add(1)
-		go func ()  {
-			defer wg.Done()
+		wp.wg.Add(1)
+		go func() {
+			defer wp.wg.Done()
 			for {
 				select {
-				case <- ctx.Done():
-						return
-				case job , ok :=  <- wp.jobs:
+				case <-ctx.Done():
+					return
+				case job, ok := <-wp.jobs:
 					if !ok {
 						return
 					}
-					_ = process(job)
+					err := process(job)
+					if err != nil {
+						log.Println("Error processing job:", err)
+						continue
+					}
 				}
 			}
 		}()
 	}
 
-	wg.Wait()
-	close(wp.Done)
 }
 
 func (wp *WorkerPool) Submit(job *article.ArticleRequest) {
@@ -54,5 +54,5 @@ func (wp *WorkerPool) Submit(job *article.ArticleRequest) {
 
 func (wp *WorkerPool) Close() {
 	close(wp.jobs)
-	<-wp.Done
+	wp.wg.Wait()
 }

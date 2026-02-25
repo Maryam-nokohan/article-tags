@@ -2,9 +2,11 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"net"
+	"runtime"
 	"time"
 
 	"github.com/maryam-nokohan/go-article/internal/application"
@@ -32,14 +34,15 @@ func NewServer(articleService *application.ArticleService) *Server {
 }
 
 func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServer) error {
+	log.Println("handler : Received a new article stream")
 
-	pool := workerpool.New(10)
+	pool := workerpool.New(runtime.NumCPU())
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go pool.Run(ctx, func(req *article.ArticleRequest) error {
+	pool.Run(ctx, func(req *article.ArticleRequest) error {
 		if req.Article == nil {
-			return nil
+			return fmt.Errorf("invalid article data: article is nil")
 		}
 		a := domain.Article{
 			Title: req.Article.Title,
@@ -58,8 +61,6 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServ
 			pool.Close()
 
 			return stream.SendAndClose(&article.ArticleResponse{
-				Article:   &article.Article{},
-				Tags:      nil,
 				CreatedAt: time.Now().Format(time.RFC3339),
 			})
 		}
@@ -74,16 +75,21 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServ
 
 func (s *Server) TopTags(ctx context.Context, req *article.TopTagsRequst) (*article.TopTagResponse, error) {
 	TopN := req.GetTopn()
+	log.Println("handler : Received a request for top tags with limit:", TopN)
 	tags, err := s.service.GetTopTags(ctx, TopN)
 	if err != nil {
 		return nil, err
 	}
 
-	grpcTags := make([]*article.Tag, len(tags))
+	grpcTags := make([]*article.Tag,0, len(tags))
 	for _, t := range tags {
+		if t.Word == " " || t.Word == ""  || t.Freq == 0{
+			continue
+		}
 		grpcTags = append(grpcTags, &article.Tag{
 			Word: t.Word,
 			Freq: t.Freq,
+
 		})
 	}
 	return &article.TopTagResponse{
