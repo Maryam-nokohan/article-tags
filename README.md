@@ -122,6 +122,6 @@ To use the CI/CD pipeline, add these to your repository under `Settings > Secret
 │   ├── article_grpc.pb.go
 │   ├── article.pb.go
 │   └── article.proto
-└── READMME.md
+└── README.md
 
 ```
