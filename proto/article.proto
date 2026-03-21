@@ -16,8 +16,6 @@ message ArticleRequest {
 }
 
 message ArticleResponse {
-    Article article = 1;
-    repeated Tag tags = 2;
     string created_at = 3;
 }
 

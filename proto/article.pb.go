@@ -119,8 +119,6 @@ func (x *ArticleRequest) GetArticle() *Article {
 
 type ArticleResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Article       *Article               `protobuf:"bytes,1,opt,name=article,proto3" json:"article,omitempty"`
-	Tags          []*Tag                 `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -154,20 +152,6 @@ func (x *ArticleResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ArticleResponse.ProtoReflect.Descriptor instead.
 func (*ArticleResponse) Descriptor() ([]byte, []int) {
 	return file_proto_article_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ArticleResponse) GetArticle() *Article {
-	if x != nil {
-		return x.Article
-	}
-	return nil
-}
-
-func (x *ArticleResponse) GetTags() []*Tag {
-	if x != nil {
-		return x.Tags
-	}
-	return nil
 }
 
 func (x *ArticleResponse) GetCreatedAt() string {
@@ -326,10 +310,8 @@ const file_proto_article_proto_rawDesc = "" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x12\n" +
 	"\x04body\x18\x02 \x01(\tR\x04body\"<\n" +
 	"\x0eArticleRequest\x12*\n" +
-	"\aarticle\x18\x01 \x01(\v2\x10.article.ArticleR\aarticle\"~\n" +
-	"\x0fArticleResponse\x12*\n" +
-	"\aarticle\x18\x01 \x01(\v2\x10.article.ArticleR\aarticle\x12 \n" +
-	"\x04tags\x18\x02 \x03(\v2\f.article.TagR\x04tags\x12\x1d\n" +
+	"\aarticle\x18\x01 \x01(\v2\x10.article.ArticleR\aarticle\"0\n" +
+	"\x0fArticleResponse\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x03 \x01(\tR\tcreatedAt\"#\n" +
 	"\rTopTagsRequst\x12\x12\n" +
@@ -366,18 +348,16 @@ var file_proto_article_proto_goTypes = []any{
 }
 var file_proto_article_proto_depIdxs = []int32{
 	0, // 0: article.ArticleRequest.article:type_name -> article.Article
-	0, // 1: article.ArticleResponse.article:type_name -> article.Article
-	4, // 2: article.ArticleResponse.tags:type_name -> article.Tag
-	4, // 3: article.TopTagResponse.tags:type_name -> article.Tag
-	1, // 4: article.ArticleService.ProcessArticle:input_type -> article.ArticleRequest
-	3, // 5: article.ArticleService.TopTags:input_type -> article.TopTagsRequst
-	2, // 6: article.ArticleService.ProcessArticle:output_type -> article.ArticleResponse
-	5, // 7: article.ArticleService.TopTags:output_type -> article.TopTagResponse
-	6, // [6:8] is the sub-list for method output_type
-	4, // [4:6] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	4, // 1: article.TopTagResponse.tags:type_name -> article.Tag
+	1, // 2: article.ArticleService.ProcessArticle:input_type -> article.ArticleRequest
+	3, // 3: article.ArticleService.TopTags:input_type -> article.TopTagsRequst
+	2, // 4: article.ArticleService.ProcessArticle:output_type -> article.ArticleResponse
+	5, // 5: article.ArticleService.TopTags:output_type -> article.TopTagResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_proto_article_proto_init() }
