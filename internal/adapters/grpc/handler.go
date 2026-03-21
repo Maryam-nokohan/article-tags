@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/maryam-nokohan/go-article/internal/application"
+	application "github.com/maryam-nokohan/go-article/internal/application"
 	"github.com/maryam-nokohan/go-article/internal/domain"
 	"github.com/maryam-nokohan/go-article/internal/pkg"
 	article "github.com/maryam-nokohan/go-article/proto"
@@ -19,16 +19,26 @@ import (
 
 type Server struct {
 	article.UnimplementedArticleServiceServer
-	service    *application.ArticleService
+
+	publishService    *application.IngestionService
+	processingService *application.ProcessingService
+
 	grpcServer *grpc.Server
 }
 
-func NewServer(articleService *application.ArticleService) *Server {
+func NewServer(
+	publishSvc *application.IngestionService,
+	processingSvc *application.ProcessingService,
+) *Server {
+
 	s := &Server{
-		service:    articleService,
-		grpcServer: grpc.NewServer(),
+		publishService:    publishSvc,
+		processingService: processingSvc,
+		grpcServer:        grpc.NewServer(),
 	}
+
 	article.RegisterArticleServiceServer(s.grpcServer, s)
+
 	return s
 }
 
@@ -39,10 +49,9 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServ
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-
 	pool.Run(ctx, func(a *domain.Article) error {
-		if err := s.service.ProcessArticle(a); err != nil {
-			log.Println("Error saving article:", err)
+		if err := s.publishService.AcceptArticle(a); err != nil {
+			log.Println("Error publishing article:", err)
 			return err
 		}
 		return nil
@@ -73,24 +82,28 @@ func (s *Server) ProcessArticle(stream article.ArticleService_ProcessArticleServ
 }
 
 func (s *Server) TopTags(ctx context.Context, req *article.TopTagsRequst) (*article.TopTagResponse, error) {
+
 	TopN := req.GetTopn()
-	log.Println("handler : Received a request for top tags with limit:", TopN)
-	tags, err := s.service.GetTopTags(ctx, TopN)
+
+	tags, err := s.processingService.GetTopTags(ctx, TopN)
 	if err != nil {
 		return nil, err
 	}
 
-	grpcTags := make([]*article.Tag,0, len(tags))
+	grpcTags := make([]*article.Tag, 0, len(tags))
+
 	for _, t := range tags {
-		if t.Word == " " || t.Word == ""  || t.Freq == 0{
+
+		if t.Word == "" || t.Freq == 0 {
 			continue
 		}
+
 		grpcTags = append(grpcTags, &article.Tag{
 			Word: t.Word,
 			Freq: t.Freq,
-
 		})
 	}
+
 	return &article.TopTagResponse{
 		Tags: grpcTags,
 	}, nil
