@@ -16,8 +16,13 @@ func Newconfig() (*Config, error) {
 	dbName := os.Getenv("DB_NAME")
 	gRPCPort:= os.Getenv("GRPC_PORT")
 	uri := os.Getenv("URI")
+	nats_url := os.Getenv("NATS_URL")
+	endpoint   := os.Getenv("ENDPOINT")  
+	region     := os.Getenv("REGION")    
+	accesskey  := os.Getenv("ACCESSKEY") 
+	secretkey := os.Getenv("SECRETEKEY")
 
-	if uri == "" || dbName == "" || gRPCPort == "" {
+	if uri == "" || nats_url== ""|| dbName == "" || gRPCPort == "" || endpoint == "" || region == "" || accesskey == "" || secretkey=="" {
 		log.Fatal("setup your .env")
 	}
 
@@ -25,5 +30,10 @@ func Newconfig() (*Config, error) {
 		DBName: dbName,
 		GRPC_Port: gRPCPort,
 		URI:    uri,
+		NATS_URL: nats_url,
+		ENDPOINT: endpoint,
+		REGION: region,
+		ACCESSKEY: accesskey,
+		SECRETEKEY: secretkey,
 	}, nil
 }
