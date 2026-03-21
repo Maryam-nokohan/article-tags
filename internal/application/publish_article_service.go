@@ -39,6 +39,7 @@ func (s *IngestionService) AcceptArticle(article *domain.Article) error {
     }
 
     evt := domain.ArticleCreatedEvent{
+        ArticleID: article.ID,
         Title:     article.Title,
         ObjectKey: key,
         CreatedAt: article.Created_at.Format(time.RFC3339),
