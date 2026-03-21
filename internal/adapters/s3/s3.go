@@ -44,7 +44,7 @@ func NewS3Storage(endpoint, region, bucket, accesskey, secretkey string) (*S3Sto
 }
 func (s *S3Storage) Upload(key string, data []byte) (string, error) {
 	_, err := s.client.PutObjectWithContext(context.TODO(), &s3.PutObjectInput{
-		Bucket:      aws.String(s.bucket),
+		Bucket:      &s.bucket,
 		Key:         aws.String(key),
 		Body:        bytes.NewReader(data),
 		ContentType: aws.String("application/json"),
