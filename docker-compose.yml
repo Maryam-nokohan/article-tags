@@ -8,6 +8,12 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  nats:
+    image: nats:2
+    container_name: nats
+    ports:
+      - "4222:4222"
+    restart: unless-stopped
   app:
     build:
       context: .
@@ -15,6 +21,12 @@ services:
         - DB_NAME=${DB_NAME}
         - URI=${URI}
         - GRPC_PORT=${GRPC_PORT}
+        - NATS_URL=${NATS_URL}
+        - ENDPOINT=${ENDPOINT}
+        - REGION=${REGION}
+        - ACCESSKEY=${ACCESSKEY}
+        - SECRETEKEY=${SECRETEKEY}
+        - BUCKET=${BUCKET}
     container_name: article-tags
     ports:
       - "${GRPC_PORT}:${GRPC_PORT}"
@@ -23,9 +35,16 @@ services:
       - DB_NAME=${DB_NAME}
       - GRPC_PORT=${GRPC_PORT}
       - STOPWORDS_PATH=/app/internal/pkg/stopwords.txt
+      - NATS_URL=${NATS_URL}
+      - ENDPOINT=${ENDPOINT}
+      - REGION=${REGION}
+      - ACCESSKEY=${ACCESSKEY}
+      - SECRETEKEY=${SECRETEKEY}
+      - BUCKET=${BUCKET}
     restart: unless-stopped
     depends_on:
       - mongo
+      - nats
 
 volumes:
   mongo_data:
