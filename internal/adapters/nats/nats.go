@@ -1,4 +1,4 @@
-package natsadapter
+package nats
 
 import (
 	"log"
