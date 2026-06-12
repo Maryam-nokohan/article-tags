@@ -1,5 +1,5 @@
 FROM golang:1.24.5-alpine AS builder
-ENV GOPROXY=https://mirror-go.runflare.com
+ENV GOPROXY=https://proxy.golang.org,direct
 
 WORKDIR /app
 
