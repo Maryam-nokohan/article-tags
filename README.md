@@ -2,28 +2,109 @@
 
 ![Go Version](https://img.shields.io/badge/Go-1.24.5-blue)
 ![Docker](https://img.shields.io/badge/Docker-supported-blue)
+![gRPC](https://img.shields.io/badge/gRPC-enabled-green)
+![MongoDB](https://img.shields.io/badge/MongoDB-supported-brightgreen)
+![NATS](https://img.shields.io/badge/NATS-event--driven-orange)
+![S3](https://img.shields.io/badge/S3-storage-blue)
 
-A high-performance gRPC service written in Go for managing and processing article tags, backed by MongoDB.
+A high-performance event-driven article processing system written in Go. The service uses gRPC for article ingestion, NATS for asynchronous messaging, MongoDB for persistence, and S3-compatible storage for article content.
+
+---
 
 ## 🚀 Features
 
-- **gRPC API:** Fast and efficient communication.
-- **Worker Pool Pattern:** Efficient concurrency management for processing large articles without exhausting system resources.
-- **MongoDB Integration:** Persistent storage for article metadata.
-- **Dockerized:** Fully containerized setup with Docker Compose.
-- **CI/CD:** Automated builds and Docker Hub pushes via GitHub Actions.
+* **gRPC API** for article publishing.
+* **Event-Driven Architecture** using NATS.
+* **MongoDB Integration** for article metadata persistence.
+* **S3 Object Storage** for article content storage.
+* **Asynchronous Processing Pipeline**.
+* **Worker Pool Pattern** for efficient tag extraction.
+* **Dockerized Deployment** with Docker Compose.
+* **Clean Architecture** with Ports and Adapters pattern.
+
+---
+
+## 🏗️ Architecture
+
+```text
+                +----------------------+
+                |  gRPC Publish Client |
+                +----------+-----------+
+                           |
+                           v
+                +----------------------+
+                | PublishArticleService|
+                +----------+-----------+
+                           |
+                           |
+                           v
+                       MongoDB
+
+                           |
+                           | Publish Event
+                           v
+                         NATS
+                  article.created
+                           |
+                           v
+                +----------------------+
+                | Article Processing   |
+                |      Service         |
+                +----------+-----------+
+                           |
+                +----------+-----------+
+                |                      |
+                v                      v
+
+         Extract Tags          Upload Content
+                                   to S3
+
+                +----------+-----------+
+                           |
+                           v
+                       MongoDB
+```
 
 ---
 
 ## ⚙️ Environment Variables
 
-To run this project, create a `.env` file in the root directory. This file is used by Docker Compose to inject build arguments and runtime variables.
+Create a `.env` file in the project root:
 
-| Variable    | Description                     | Default                 |
-| :---------- | :------------------------------ | :---------------------- |
-| `DB_NAME`   | Name of the MongoDB database    | `article`               |
-| `URI`       | MongoDB connection string       | `mongodb://mongo:27017` |
-| `GRPC_PORT` | Port the gRPC server listens on | `50051`                 |
+```env
+# MongoDB
+DB_NAME="article"
+URI=mongodb://mongo:27017
+
+# gRPC
+GRPC_PORT=50051
+
+# NATS
+NATS_URL=nats://nats:4222
+
+# S3
+ENDPOINT=https://aws/articles-storage
+REGION=uk
+ACCESSKEY=YOUR_ACCESS_KEY
+SECRETEKEY=YOUR_SECRET_KEY
+BUCKET=articles-storage
+```
+
+### Variable Description
+
+| Variable     | Description                           |
+| ------------ | ------------------------------------- |
+| `DB_NAME`    | MongoDB database name                 |
+| `URI`        | MongoDB connection URI                |
+| `GRPC_PORT`  | gRPC server port                      |
+| `NATS_URL`   | NATS broker connection URL            |
+| `ENDPOINT`   | S3-compatible object storage endpoint |
+| `REGION`     | Storage region                        |
+| `ACCESSKEY`  | Object storage access key             |
+| `SECRETEKEY` | Object storage secret key             |
+| `BUCKET`     | Bucket used to store article content  |
+
+> Never commit real credentials to source control. Store them in a local `.env` file or CI/CD secrets.
 
 ---
 
@@ -31,97 +112,195 @@ To run this project, create a `.env` file in the root directory. This file is us
 
 ### Prerequisites
 
-- Docker & Docker Compose
-- Go 1.24.5 (if running locally without Docker)
+* Docker
+* Docker Compose
+* Go 1.24.5+
 
-### Installation & Setup
+---
 
-1. **Clone the repository:**
+### Clone Repository
+
 ```bash
-   git clone [https://github.com/Maryam-nokohan/article-tags.git](https://github.com/Maryam-nokohan/article-tags.git)
-   cd article-tags
+git clone https://github.com/Maryam-nokohan/article-tags.git
+cd article-tags
 ```
 
-2. **Configure Environment:**
-Create a .env file:
-```bash
+---
+
+### Configure Environment
+
+Create a `.env` file:
+
+```env
 DB_NAME=article
 URI=mongodb://mongo:27017
+
 GRPC_PORT=50051
+
+BROKER_URL=nats://nats:4222
+ARTICLE_CREATED_SUBJECT=article.created
+
+S3_ENDPOINT=minio:9000
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+S3_BUCKET=articles
+S3_USE_SSL=false
 ```
 
-3. **Run with Docker Compose:**
+---
+
+### Run with Docker Compose
+
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
-4. **Run client test :**
+
+This starts:
+
+* MongoDB
+* NATS
+* S3
+* gRPC Server
+
+---
+
+## 🧪 Running Clients
+
+### Publish an Article
 
 ```bash
-go run cmd/client/main.go
+go run cmd/clients/client_article_creation/main.go
 ```
 
-## 🧪 CI/CD Pipeline
+This client sends an article to the gRPC server.
 
-This project uses **GitHub Actions**. On every push to `main`:
+The server:
 
-1.  **Code Checkout**: The repository is cloned into the runner.
-2.  **Docker Build**: The image is built using **GitHub Secrets** as build arguments (`--build-arg`) to ensure sensitive data is not hardcoded.
-3.  **Docker Push**: The final image is tagged and pushed to **Docker Hub** (`mary1385/article-tags`).
+1. Stores article metadata.
+2. Publishes an `article.created` event to NATS.
 
+---
 
+### Process Articles
 
-### Required GitHub Secrets
+```bash
+go run cmd/clients/client_article_processing/main.go
+```
 
-To use the CI/CD pipeline, add these to your repository under `Settings > Secrets and variables > Actions`:
+The processing client subscribes to article creation events and performs:
 
-| Secret | Purpose |
-| :--- | :--- |
-| `DOCKERHUB_USERNAME` | Your Docker Hub ID |
-| `DOCKERHUB_TOKEN` | Personal Access Token for Docker Hub |
-| `DB_NAME` | Name of the MongoDB database |
-| `URI` | MongoDB connection string |
-| `GRPC_PORT` | The port for the gRPC server |
+* Tag extraction
+* Content processing
+* Upload to S3
+* Metadata updates
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 ├── cmd
-│   ├── client
-│   │   └── main.go
-│   └── server
-│       └── main.go
+│   ├── clients
+│   │   ├── client_article_creation
+│   │   │   └── main.go
+│   │   └── client_article_processing
+│   │       └── main.go
+│   └── server
+│       └── main.go
+│
+├── internal
+│   ├── adapters
+│   │   ├── grpc
+│   │   ├── mongo
+│   │   ├── nats
+│   │   └── s3
+│   │
+│   ├── application
+│   │   ├── publish_article_service.go
+│   │   ├── article_processing_service.go
+│   │   └── tag_extractor_service.go
+│   │
+│   ├── configs
+│   │   ├── config.go
+│   │   └── load.go
+│   │
+│   ├── domain
+│   │   ├── article.go
+│   │   └── event.go
+│   │
+│   ├── pkg
+│   │   ├── normalizeText.go
+│   │   ├── pool.go
+│   │   └── stopwords.txt
+│   │
+│   └── ports
+│       ├── repository.go
+│       ├── message_broker.go
+│       ├── object_storage.go
+│       └── tag_extractor.go
+│
+├── proto
+│   ├── article.proto
+│   ├── article.pb.go
+│   └── article_grpc.pb.go
+│
 ├── docker-compose.yml
 ├── Dockerfile
 ├── go.mod
 ├── go.sum
-├── internal
-│   ├── adapters
-│   │   ├── grpc
-│   │   │   └── handler.go
-│   │   └── mongo
-│   │       └── mongoDB.go
-│   ├── application
-│   │   ├── article_service.go
-│   │   └── tag_extractor_service.go
-│   ├── configs
-│   │   ├── config.go
-│   │   └── load.go
-│   ├── domain
-│   │   ├── article.go
-│   │   ├── repository.go
-│   │   └── tag_extractor.go
-│   ├── utils
-│   │   ├── normalizeText.go
-│   │   └── stopwords.txt
-│   └── workerpool
-│       └── pool.go
-├── LICENSE
-├── proto
-│   ├── article_grpc.pb.go
-│   ├── article.pb.go
-│   └── article.proto
 └── README.md
-
 ```
+
+---
+
+## 🔄 Event Flow
+
+### Article Creation
+
+1. Client sends article via gRPC.
+2. Server validates article.
+3. Article metadata is stored in MongoDB.
+4. `article.created` event is published to NATS.
+
+### Article Processing
+
+1. Processing service subscribes to `article.created`.
+2. Event is consumed from NATS.
+3. Article content is processed.
+4. Tags are extracted using the worker pool.
+5. Content is uploaded to S3.
+6. Article metadata is updated in MongoDB.
+
+---
+
+## 🛠️ Technologies
+
+* Go 1.24.5
+* gRPC
+* MongoDB
+* NATS
+* S3 / MinIO
+* Docker
+* Docker Compose
+
+---
+
+## 🧪 Testing
+
+Run the publishing client:
+
+```bash
+go run cmd/clients/client_article_creation/main.go
+```
+
+Run the processing client:
+
+```bash
+go run cmd/clients/client_article_processing/main.go
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
